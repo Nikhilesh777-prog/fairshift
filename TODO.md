@@ -68,3 +68,12 @@
 - Include a README (setup, demo credentials, architecture overview).
 - Follow the requested build sequence: Phase 1 design system, auth, demo switcher, industry config, i18n. Phase 2 shifts + payslips. Phase 3 safety + feedback + skill passport. Phase 4 fatigue + wellbeing + admin analytics. Phase 5 polish, offline, README. After each phase, confirm everything works before moving on.
 - Final output includes the complete working app plus a 2-minute demo script covering the worker flow and the admin flow in both industries.
+
+
+## 9. Aesthetic refresh, graded color and relevant imagery — Complete
+- User request: “make the ui/ux design more aesthetic and use dfferent grade colours and also add images related to the website make it as banger one .”
+- Make the visual design feel more polished and distinctive; use visibly differentiated color grades/gradients that distinguish Construction/site work from College-Campus while retaining the FairShift identity and readable contrast.
+- Add relevant bespoke imagery to the landing hero and the Construction and Campus sector story sections; give each image a clear placement and meaningful accessible description.
+- Keep the existing worker/admin functionality, responsive layouts, dark mode, keyboard focus and reduced-motion behavior intact.
+
+**Delivery note:** The landing hero and sector story cards now use three purpose-made FairShift photographs. Site work has a pine/copper/saffron grade, Campus uses indigo/cobalt/sky, with warm paper surfaces and separate utility gradients. Desktop and 390px mobile screenshots were reviewed; typecheck and production build pass, and route/data flows remain unchanged.
