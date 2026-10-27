@@ -1,0 +1,32 @@
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ArrowRight, BadgeCheck, Banknote, CalendarDays, Clock3, Heart, MapPin, ShieldCheck, Sparkles, Sun } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { api } from '@/data/api';
+import type { WorkerHomeData } from '@/lib/types';
+import { useSession } from '@/lib/session';
+import { translate } from '@/lib/i18n';
+import { dayLabel, money } from '@/lib/utils';
+import { INDUSTRIES } from '@/lib/industry';
+import { Button, Card, EmptyState, LoadingState, StatusPill } from '@/components/ui';
+import { ShiftAction } from '@/components/ShiftAction';
+
+export default function WorkerHome() {
+  const [data, setData] = useState<WorkerHomeData | null>(null); const [loading, setLoading] = useState(true); const [error, setError] = useState('');
+  const { user, language, industry } = useSession();
+  const refresh = useCallback(() => { setLoading(true); api.home().then(setData).catch(problem => setError(problem instanceof Error ? problem.message : 'Your home screen could not load.')).finally(() => setLoading(false)); }, []);
+  useEffect(() => { refresh(); }, [refresh]);
+  const activeShift = useMemo(() => data?.upcoming.find(item => item.state === 'working') ?? data?.upcoming.find(item => item.state === 'scheduled'), [data]);
+  if (loading && !data) return <LoadingState/>;
+  if (error && !data) return <div className="page-error"><p>{error}</p><Button onClick={refresh}>Try again</Button></div>;
+  const currentPayslip = data?.recentPayslip;
+  const onShiftUpdated = () => { if (activeShift?.state === 'scheduled' && !localStorage.getItem('fairshift-first-checkin')) { localStorage.setItem('fairshift-first-checkin', 'true'); toast.success('First check-in saved. Nice work! ✨'); } refresh(); };
+  return <div className="worker-home page-enter"><div className="worker-welcome"><div><p className="eyebrow">{INDUSTRIES[industry].label} · {user?.team}</p><h1>{translate(language, 'home.greeting')}</h1><p>Good to see you, {user?.displayName.split(' ')[0]}. Here’s what’s happening today.</p></div><div className="welcome-sun"><Sun size={28}/><span>One step<br/>at a time</span></div></div>
+    {data?.fatigueMessage && <div className="kind-reminder"><span><Heart size={19}/></span><div><strong>A gentle reminder</strong><p>{data.fatigueMessage}</p></div><Link to="/worker/wellbeing" aria-label="Open wellbeing hub"><ArrowRight size={17}/></Link></div>}
+    <div className="worker-dashboard-grid"><Card className="next-shift-card"><div className="next-shift-head"><div><p className="eyebrow">{translate(language, 'home.nextShift')}</p><h2>{activeShift ? activeShift.state === 'working' ? 'You’re on shift' : 'Ready when you are' : 'A moment to reset'}</h2></div><span className="shift-icon"><CalendarDays size={20}/></span></div>{activeShift ? <><div className="shift-datetime"><strong>{dayLabel(activeShift.startsAt, language === 'hi' ? 'hi-IN' : language === 'ta' ? 'ta-IN' : 'en-US')}</strong><span>{new Intl.DateTimeFormat(language === 'hi' ? 'hi-IN' : language === 'ta' ? 'ta-IN' : 'en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date(activeShift.startsAt))} – {new Intl.DateTimeFormat(language === 'hi' ? 'hi-IN' : language === 'ta' ? 'ta-IN' : 'en-US', { hour: 'numeric', minute: '2-digit' }).format(new Date(activeShift.endsAt))}</span></div><div className="shift-place"><MapPin size={16}/>{activeShift.locationLabel} <span>·</span>{INDUSTRIES[industry].area}</div><ShiftAction shift={activeShift} onUpdated={onShiftUpdated} large/><div className="shift-card-foot"><Clock3 size={15}/><span>Hours beyond 8 in one shift count as overtime.</span></div></> : <EmptyState title="No shift is coming up" detail="Use this time to rest or check your wellbeing." icon={<Sparkles size={21}/>} />}</Card>
+      <div className="worker-side-cards"><Card className="hours-card"><div className="card-icon mint"><Clock3 size={19}/></div><p>This week</p><strong>{data?.weeklyHours.toFixed(1) ?? '0.0'} <small>hours</small></strong><div className="hours-track"><span style={{ width: `${Math.min(100, ((data?.weeklyHours ?? 0) / 48) * 100)}%` }}/></div><span className="card-caption">Your hours, clearly counted</span></Card><Card className="pay-preview"><div className="pay-preview-head"><div className="card-icon blue"><Banknote size={19}/></div><Link to="/worker/pay">Details <ArrowRight size={15}/></Link></div><p>Latest take-home pay</p><strong>{currentPayslip ? money(currentPayslip.netCents) : '—'}</strong><span className={`change-note ${(currentPayslip?.changeCents ?? 0) < 0 ? 'negative' : ''}`}>{currentPayslip ? `${currentPayslip.changeCents >= 0 ? '+' : '−'}${money(Math.abs(currentPayslip.changeCents))} vs. last month` : 'Payslip details'}</span></Card></div>
+    </div>
+    <section className="worker-quick-links"><div className="quick-links-heading"><div><p className="eyebrow">Here when you need it</p><h2>Your shift, your tools</h2></div><Link to="/worker/me">See my profile <ArrowRight size={15}/></Link></div><div className="quick-link-row"><Link to="/worker/safety" className="quick-link-card"><span className="quick-link-icon coral"><ShieldCheck size={19}/></span><span><strong>Report a safety concern</strong><small>We’ll keep you updated</small></span><ArrowRight size={17}/></Link><Link to="/worker/wellbeing" className="quick-link-card"><span className="quick-link-icon lavender"><Heart size={19}/></span><span><strong>Check in with yourself</strong><small>Private · takes a moment</small></span><ArrowRight size={17}/></Link><Link to="/worker/pay" className="quick-link-card"><span className="quick-link-icon honey"><BadgeCheck size={19}/></span><span><strong>Understand your pay</strong><small>Clear, line by line</small></span><ArrowRight size={17}/></Link></div></section>
+    <section className="recent-reports"><div className="quick-links-heading"><div><p className="eyebrow">Your latest update</p><h2>Safety reports</h2></div><Link to="/worker/safety">View all <ArrowRight size={15}/></Link></div>{data?.reports.length ? <div className="report-preview-list">{data.reports.slice(0, 2).map(report => <div className="report-preview" key={report.id}><span className="report-mark"><ShieldCheck size={17}/></span><div><strong>{report.title}</strong><small>{report.category} · {report.location}</small></div><StatusPill status={report.status}/></div>)}</div> : <EmptyState title="No safety reports yet" detail="If something needs attention, you can tell us here."/>}</section>
+  </div>;
+}
