@@ -1,6 +1,6 @@
 import type { DashboardData, FeedbackSummary, Industry, Payslip, SafetyReport, Shift, Skill, User, WorkerHomeData } from '@/lib/types';
 
-const CACHE_PREFIX = 'fairshift-cache:';
+const CACHE_PREFIX = 'fairshift-cache:inr-v1:';
 const QUEUE_KEY = 'fairshift-pending-actions';
 const OFFLINE_USER_KEY = 'fairshift-offline-user';
 const DEMO_USERS: Record<string, User> = {

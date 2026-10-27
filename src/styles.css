@@ -398,3 +398,88 @@ body { background: var(--canvas); color: var(--ink); }
   :root[data-theme='dark'] .hero-image-frame { border-color: #32443b; }
 }
 @media (prefers-reduced-motion: reduce) { .sector-photo img, .sector-card, .feature-card { transition: none !important; } }
+
+
+/* Palette refinement: ocean teal, slate ink and a measured saffron accent */
+:root {
+  --forest: #285f72;
+  --forest-dark: #214958;
+  --canvas: #f7f4ee;
+  --paper: #fffdf8;
+  --ink: #202b3b;
+  --muted: #637184;
+  --line: #e5ded2;
+  --amber: #df9d38;
+  --blue: #527c9d;
+  --red: #b4554b;
+  --indigo: #4b5f8b;
+  --coral: #bf714f;
+  --soft-shadow: 0 16px 46px rgba(28, 44, 63, .1);
+  --grade-site: linear-gradient(135deg, #285f72 0%, #3e7b87 56%, #d38d43 140%);
+  --grade-campus: linear-gradient(135deg, #455b83 0%, #527e9c 55%, #77b7ae 115%);
+  --grade-wellbeing: linear-gradient(135deg, #4f817f 0%, #9ab9ac 60%, #dfbd74 130%);
+  --grade-safety: linear-gradient(135deg, #b85b4e 0%, #dc8151 62%, #edb458 130%);
+  --wash-site: linear-gradient(135deg, #f2e3d5 0%, #e8edf0 48%, #f6f2e9 100%);
+  --wash-campus: linear-gradient(135deg, #e6eaf1 0%, #e3efee 55%, #f6f2e9 100%);
+}
+:root[data-theme='dark'] {
+  --canvas: #131c29;
+  --paper: #1d2938;
+  --ink: #f2f2ed;
+  --muted: #b1bdca;
+  --line: #354456;
+  --forest: #79bdc2;
+  --forest-dark: #a2d8d5;
+  --amber: #f1b85c;
+  --blue: #8ab3d0;
+  --red: #ed887b;
+  --indigo: #b2bce6;
+  --coral: #e49372;
+  --soft-shadow: 0 16px 46px rgba(0, 0, 0, .28);
+}
+body { background: var(--canvas); color: var(--ink); }
+.brand-mark { background: var(--forest); box-shadow: 0 5px 14px color-mix(in srgb, var(--forest) 25%, transparent); }
+.brand-name span { color: var(--forest); }
+.btn-primary { background: var(--forest); box-shadow: 0 8px 18px color-mix(in srgb, var(--forest) 24%, transparent); }
+.btn-primary:hover:not(:disabled) { background: var(--forest-dark); }
+:focus-visible { outline-color: var(--amber); }
+::selection { background: color-mix(in srgb, var(--forest) 18%, white); color: #183446; }
+.hero-wrap { background: radial-gradient(ellipse at 8% 2%, rgba(218, 232, 235, .82), transparent 45%), radial-gradient(ellipse at 92% 8%, rgba(249, 226, 195, .62), transparent 38%); }
+.hero-content h1 span { background: linear-gradient(100deg, #285f72 0%, #4a8290 67%, #d18c43 130%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero-image-frame { background: var(--grade-site); box-shadow: 0 28px 70px rgba(35, 54, 72, .2); }
+.hero-image-frame::after, .sector-photo::after { background: linear-gradient(180deg, rgba(17, 34, 48, .02) 30%, rgba(15, 31, 46, .69) 100%); }
+.hero-photo-index { background: rgba(26, 48, 66, .28); }
+.impact-strip { background: linear-gradient(120deg, var(--paper) 0%, #f0eee5 53%, #e9f0f2 100%); }
+.feature-card-mint { --feature-color: #448c82; --feature-grade: linear-gradient(90deg, #327b7f, #83b7a8); }
+.feature-card-amber { --feature-color: #d48c39; --feature-grade: linear-gradient(90deg, #c7773f, #e6b254); }
+.feature-card-blue { --feature-color: #527c9d; --feature-grade: linear-gradient(90deg, #456785, #80adbf); }
+.feature-card-rose { --feature-color: #b66b63; --feature-grade: linear-gradient(90deg, #b66b63, #a58bb8); }
+.sectors-teaser { background: linear-gradient(112deg, #eee7dc 0%, #e9eeeb 48%, #e6edf2 100%); border-color: #e1ddd3; }
+.sectors-teaser::after { border-color: rgba(58, 92, 122, .2); box-shadow: 0 0 0 35px rgba(58, 92, 122, .045), 0 0 0 75px rgba(58, 92, 122, .03); }
+.sector-card-site { background: linear-gradient(115deg, #fffdf9 0%, #fff7ed 100%); border-color: #eadbc9; }
+.sector-card-campus { background: linear-gradient(115deg, #fffdf9 0%, #eff3f7 100%); border-color: #d9e1e7; }
+.sector-card-site .sector-icon { background: linear-gradient(135deg, #fff0d5, #f4d6b3); color: #955c35; }
+.sector-card-campus .sector-icon { background: linear-gradient(135deg, #e6edf5, #d5ece8); color: #456d82; }
+.closing-cta { background: linear-gradient(120deg, #203e50 0%, #2d6975 58%, #596688 130%); box-shadow: 0 20px 54px rgba(29, 59, 75, .2); }
+.closing-cta .btn-primary { color: #243344; background: linear-gradient(110deg, #f2c364, #e69b42); }
+.sectors-main > h1 span { background: linear-gradient(95deg, #285f72, #6487a7 65%, #c9854b 115%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.construction-sector { border-top-color: #c47a43; }
+.campus-sector { border-top-color: #587a9d; }
+.construction-detail > span { background: linear-gradient(135deg, #fff0d5, #f2d5bb); color: #925d38; }
+.campus-detail > span { background: linear-gradient(135deg, #e5edf4, #d7ece8); color: #486f85; }
+.construction-sector .sector-detail-row > svg { color: #bd7746; }
+.campus-sector .sector-detail-row > svg { color: #527c9d; }
+.sectors-bottom { background: linear-gradient(110deg, #f0e8dd 0%, #e6eef0 100%); border-color: #dfe4e3; }
+.sectors-bottom .eyebrow { color: #526d82; }
+.nav-link.active { color: var(--forest); background: color-mix(in srgb, var(--forest) 9%, var(--paper)); }
+.nav-link.active::before { background: var(--forest); }
+.bottom-nav-item.active { color: var(--forest); background: color-mix(in srgb, var(--forest) 10%, var(--paper)); }
+.voice-help { border-color: color-mix(in srgb, var(--forest) 35%, var(--line)); background: var(--forest); box-shadow: 0 7px 22px color-mix(in srgb, var(--forest) 28%, transparent); }
+:root[data-theme='dark'] .nav-link.active { color: var(--forest); background: color-mix(in srgb, var(--forest) 16%, var(--paper)); }
+:root[data-theme='dark'] .nav-link.active::before { background: var(--forest); }
+:root[data-theme='dark'] .hero-wrap { background: radial-gradient(ellipse at 8% 2%, rgba(63, 112, 132, .22), transparent 45%), radial-gradient(ellipse at 92% 8%, rgba(197, 137, 74, .16), transparent 38%); }
+:root[data-theme='dark'] .impact-strip { background: linear-gradient(120deg, #1d2938 0%, #25333c 53%, #292f40 100%); }
+:root[data-theme='dark'] .sectors-teaser, :root[data-theme='dark'] .sectors-bottom { background: linear-gradient(112deg, #20303c 0%, #24343b 55%, #282e3e 100%); border-color: var(--line); }
+:root[data-theme='dark'] .sector-card-site { background: linear-gradient(115deg, #272d35, #3a302c); border-color: #5a4738; }
+:root[data-theme='dark'] .sector-card-campus { background: linear-gradient(115deg, #242e38, #293645); border-color: #435368; }
+:root[data-theme='dark'] .sector-card { color: var(--ink); }

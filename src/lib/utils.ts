@@ -1,5 +1,5 @@
 export const cx = (...parts: Array<string | false | null | undefined>) => parts.filter(Boolean).join(' ');
-export const money = (cents: number, currency = 'USD', locale = 'en-US') => new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(cents / 100);
+export const money = (minorUnits: number, currency = 'INR', locale = 'en-IN') => new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 0 }).format(minorUnits / 100);
 export const dayLabel = (value: string, locale = 'en-US') => new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric' }).format(new Date(value));
 export const dateLabel = (value: string, locale = 'en-US') => new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value));
 export const hoursBetween = (start: string, end: string) => Math.max(0, (new Date(end).getTime() - new Date(start).getTime()) / 3_600_000);

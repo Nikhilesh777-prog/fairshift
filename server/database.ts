@@ -33,7 +33,7 @@ const schema = [
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS employees (
     id VARCHAR(36) PRIMARY KEY, organization_id VARCHAR(36) NOT NULL, display_name VARCHAR(120) NOT NULL, team VARCHAR(80) NOT NULL,
-    wage_cents INT NOT NULL DEFAULT 2400, share_token VARCHAR(64) NOT NULL UNIQUE, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    wage_cents INT NOT NULL DEFAULT 24000, share_token VARCHAR(64) NOT NULL UNIQUE, created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX employee_org_team (organization_id, team), CONSTRAINT employee_org_fk FOREIGN KEY (organization_id) REFERENCES organizations(id)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   `CREATE TABLE IF NOT EXISTS users (
@@ -142,7 +142,7 @@ async function seed() {
       const teams = ['Team A', 'Team A', 'Team A', 'Team A', 'Team A', 'Team A', 'Team B', 'Team B', 'Team B', 'Team B', 'Team B', 'Team B'];
       const employees: Array<{ id: string; name: string; team: string; wage: number; token: string }> = [];
       for (let index = 0; index < names.length; index += 1) {
-        const employee = { id: `${sector.id}-emp-${String(index + 1).padStart(2, '0')}`, name: names[index]!, team: teams[index]!, wage: 2200 + (index % 4) * 150, token: randomBytes(24).toString('base64url') };
+        const employee = { id: `${sector.id}-emp-${String(index + 1).padStart(2, '0')}`, name: names[index]!, team: teams[index]!, wage: 22_000 + (index % 4) * 1_500, token: randomBytes(24).toString('base64url') };
         employees.push(employee);
         await connection.execute('INSERT INTO employees (id, organization_id, display_name, team, wage_cents, share_token) VALUES (?, ?, ?, ?, ?, ?)', [employee.id, sector.id, employee.name, employee.team, employee.wage, employee.token]);
       }
@@ -174,10 +174,16 @@ async function seed() {
         for (let period = 0; period < 2; period += 1) {
           const end = new Date(); end.setMonth(end.getMonth() - period, 1);
           const start = new Date(end.getFullYear(), end.getMonth(), 1);
-          const net = 3_100_00 + (employeeIndex % 4) * 22_500 - period * 85_00;
+          const base = 2_950_000;
+          const overtimeHours = 8 + employeeIndex % 5;
+          const overtimeRate = Math.round(employee.wage * 1.5);
+          const deductions = 185_000;
+          const change = (employeeIndex + 1) % 2 ? -75_000 : 90_000;
+          const periodBase = period === 0 ? base : base - change;
+          const net = periodBase + Math.round(overtimeHours * overtimeRate) - deductions;
           await connection.execute(
             'INSERT INTO payslips (id, employee_id, period_start, period_end, base_cents, overtime_hours, overtime_rate_cents, deductions_cents, net_cents, change_cents) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [id(), employee.id, safeDate(start), safeDate(end), 2_950_00, 8 + employeeIndex % 5, Math.round(employee.wage * 1.5), 18_500, net, period === 0 ? (employeeIndex % 2 ? -7_500 : 9_000) : 0],
+            [id(), employee.id, safeDate(start), safeDate(end), periodBase, overtimeHours, overtimeRate, deductions, net, period === 0 ? change : 0],
           );
         }
         const certs = sector.industry === 'construction' ? ['Site safety induction', 'Working at heights'] : ['First aid basics', 'Campus fire safety'];
@@ -221,6 +227,62 @@ async function seed() {
   finally { connection.release(); }
 }
 
+async function migrateSeededPayToInr(convertExisting: boolean) {
+  if (!pool) return;
+  const [migration] = await pool.query<RowDataPacket[]>('SELECT version FROM schema_migrations WHERE version = ?', ['004_inr_demo_pay']);
+  if (migration.length) return;
+  await inTransaction(async connection => {
+    if (convertExisting) {
+      const demoOrganizations = ['org-construction', 'org-campus'];
+      await connection.execute('UPDATE employees SET wage_cents = wage_cents * 10 WHERE organization_id IN (?, ?)', demoOrganizations);
+      await connection.execute(
+        `UPDATE payslips p JOIN employees e ON e.id = p.employee_id
+         SET p.base_cents = 2950000,
+             p.overtime_rate_cents = ROUND(e.wage_cents * 1.5),
+             p.deductions_cents = 185000,
+             p.net_cents = 2950000 + ROUND(p.overtime_hours * ROUND(e.wage_cents * 1.5)) - 185000
+               - CASE
+                   WHEN DATE_FORMAT(p.period_start, '%Y-%m') = DATE_FORMAT(CURRENT_DATE(), '%Y-%m') THEN 0
+                   WHEN DATE_FORMAT(p.period_start, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH), '%Y-%m')
+                     THEN CASE WHEN MOD(CAST(RIGHT(e.id, 2) AS UNSIGNED), 2) = 0 THEN 90000 ELSE -75000 END
+                   ELSE 0
+                 END,
+             p.change_cents = CASE
+               WHEN DATE_FORMAT(p.period_start, '%Y-%m') = DATE_FORMAT(CURRENT_DATE(), '%Y-%m')
+                 THEN CASE WHEN MOD(CAST(RIGHT(e.id, 2) AS UNSIGNED), 2) = 0 THEN 90000 ELSE -75000 END
+               ELSE 0
+             END
+         WHERE e.organization_id IN (?, ?)`, demoOrganizations,
+      );
+    }
+    await connection.execute('INSERT INTO schema_migrations (version) VALUES (?)', ['004_inr_demo_pay']);
+  });
+}
+
+async function migrateInrPayslipReconcile(convertExisting: boolean) {
+  if (!pool) return;
+  const [migration] = await pool.query<RowDataPacket[]>('SELECT version FROM schema_migrations WHERE version = ?', ['005_inr_payslip_reconcile']);
+  if (migration.length) return;
+  await inTransaction(async connection => {
+    if (convertExisting) {
+      const demoOrganizations = ['org-construction', 'org-campus'];
+      const currentPeriod = "DATE_FORMAT(p.period_start, '%Y-%m') = DATE_FORMAT(CURRENT_DATE(), '%Y-%m')";
+      const previousPeriod = "DATE_FORMAT(p.period_start, '%Y-%m') = DATE_FORMAT(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH), '%Y-%m')";
+      const change = 'CASE WHEN MOD(CAST(RIGHT(e.id, 2) AS UNSIGNED), 2) = 0 THEN 90000 ELSE -75000 END';
+      const periodBase = `CASE WHEN ${currentPeriod} THEN 2950000 WHEN ${previousPeriod} THEN 2950000 - (${change}) ELSE 2950000 END`;
+      await connection.execute(
+        `UPDATE payslips p JOIN employees e ON e.id = p.employee_id
+         SET p.base_cents = ${periodBase},
+             p.net_cents = (${periodBase}) + ROUND(p.overtime_hours * p.overtime_rate_cents) - p.deductions_cents,
+             p.change_cents = CASE WHEN ${currentPeriod} THEN (${change}) ELSE 0 END
+         WHERE e.organization_id IN (?, ?)`,
+        demoOrganizations,
+      );
+    }
+    await connection.execute('INSERT INTO schema_migrations (version) VALUES (?)', ['005_inr_payslip_reconcile']);
+  });
+}
+
 export async function migrateAndSeed() {
   if (!pool) return { persistent: false, seeded: false };
   await pool.query(schema[schema.length - 1]!);
@@ -234,6 +296,8 @@ export async function migrateAndSeed() {
   await pool.execute('INSERT IGNORE INTO schema_migrations (version) VALUES (?)', ['003_anonymous_participant_receipts']);
   const before = await rows<RowDataPacket[]>('SELECT COUNT(*) AS total FROM organizations');
   const wasEmpty = Number(before[0]?.total ?? 0) === 0;
+  await migrateSeededPayToInr(!wasEmpty);
+  await migrateInrPayslipReconcile(!wasEmpty);
   if (wasEmpty) await seed();
   const [tokenMigration] = await pool.query<RowDataPacket[]>('SELECT version FROM schema_migrations WHERE version = ?', ['002_private_passport_tokens']);
   if (!tokenMigration.length) {

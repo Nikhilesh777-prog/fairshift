@@ -76,4 +76,14 @@
 - Add relevant bespoke imagery to the landing hero and the Construction and Campus sector story sections; give each image a clear placement and meaningful accessible description.
 - Keep the existing worker/admin functionality, responsive layouts, dark mode, keyboard focus and reduced-motion behavior intact.
 
-**Delivery note:** The landing hero and sector story cards now use three purpose-made FairShift photographs. Site work has a pine/copper/saffron grade, Campus uses indigo/cobalt/sky, with warm paper surfaces and separate utility gradients. Desktop and 390px mobile screenshots were reviewed; typecheck and production build pass, and route/data flows remain unchanged.
+**Delivery note:** The landing hero and sector story cards use three purpose-made FairShift photographs. The final grade pairs deep ink/slate-teal with warm paper and saffron; Construction uses copper/amber, and Campus uses slate-blue/sea-glass. Desktop and 390px mobile screenshots were reviewed; typecheck and production build pass, and route/data flows remain unchanged.
+
+
+## 10. INR pay and refined palette — Complete
+- User request: “bruh slightly change the webpage colour to a better one and change the currency into indian rupees and make it look slightly different from the same website”
+- Update the site-wide UI palette to a distinct deep ink/slate-teal and warm-paper direction with restrained saffron, while preserving clear site-versus-campus grades, status contrast, light/dark modes and responsive behavior.
+- Display every monetary amount as Indian rupees (`INR`, `₹`) with Indian digit grouping, including payslip values, chart tooltips, voice readout, CSV download, worker pay preview and the landing-page sample.
+- Make newly seeded demo wages/payslips plausible in INR and internally consistent: net pay equals base pay plus overtime pay minus deductions; convert existing demo pay records once through idempotent migrations limited to the two seeded FairShift demo organisations.
+- Preserve the current FairShift product flows, generated imagery, accessibility, and existing unrelated user data.
+
+**Delivery note:** The shared formatter uses Indian rupees and Indian grouping across the payslip, voice, CSV, and worker/admin surfaces; the landing preview shows ₹30,290. Migrations 004 and 005 converted only the two seeded demo organisations and reconcile all 48 payslips. The live worker API confirms ₹29,500 base + ₹2,640 overtime − ₹1,850 deductions = ₹30,290 net. Refreshed palette and PWA chrome are in place; desktop/mobile screenshots, TypeScript and production build succeeded.

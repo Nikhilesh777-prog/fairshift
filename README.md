@@ -28,7 +28,7 @@ pnpm build
 pnpm start        # serve the production client and API
 ```
 
-The first migration creates both demo organisations, four demo accounts, 30 days of weekday shift data, two periods of pay data, safety examples, anonymous feedback, skills and aggregate mood examples. Migration `002_private_passport_tokens` rotates seeded passport identifiers to high-entropy, URL-safe tokens; migration `003_anonymous_participant_receipts` adds the separate keyed receipt tables used for distinct-participant thresholds. Migrations are idempotent. Local `.env` files are ignored by Git; provide your own managed database connection only in an approved environment.
+The first migration creates both demo organisations, four demo accounts, 30 days of weekday shift data, two periods of pay data, safety examples, anonymous feedback, skills and aggregate mood examples. Migration `002_private_passport_tokens` rotates seeded passport identifiers to high-entropy, URL-safe tokens; migration `003_anonymous_participant_receipts` adds the separate keyed receipt tables used for distinct-participant thresholds; migration `004_inr_demo_pay` converts only the two seeded demo organisations to Indian-rupee pay units, and `005_inr_payslip_reconcile` makes each demo payslip's base, overtime and deductions reconcile to net pay. Migrations are idempotent and leave unrelated organisations untouched. Local `.env` files are ignored by Git; provide your own managed database connection only in an approved environment.
 
 ## Architecture
 
@@ -45,7 +45,7 @@ The first migration creates both demo organisations, four demo accounts, 30 days
 ## Feature notes
 
 - Shift check-in/out accepts an organization-specific QR value. Use the built-in camera scanner where supported or choose **Simulate QR**. Location permission is optional.
-- Pay includes base, overtime, deductions, net pay, a change note, speech synthesis, CSV download and print.
+- Pay uses Indian rupees (`₹`) with Indian digit grouping, and includes base, overtime, deductions, reconciled net pay, a change note, speech synthesis, an INR-labeled CSV download and print.
 - Safety reports support text, browser speech recognition, compressed photos, a status tracker, assignment and manager comments.
 - Anonymous feedback is aggregated; no feedback screen asks for an account identity. Mood check-ins are stored without an employee identifier and are only returned to admins as team trends after the minimum group size.
 - The worker Wellbeing Hub has a demo emergency contact, private daily feeling check-in, shift-based water/break suggestions and an optional weather check; it never stores location.

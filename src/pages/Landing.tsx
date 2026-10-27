@@ -83,7 +83,7 @@ export default function Landing() {
             <div className="mini-bar"><span /></div>
             <div className="mini-foot"><span><i className="status-good" />Regular hours</span><strong>5.5 h</strong></div>
             <div className="mini-foot"><span><i className="status-amber" />Overtime</span><strong>2.0 h</strong></div>
-            <div className="mini-pay"><span className="mini-pay-icon"><Banknote size={19} /></span><div><small>PAY THIS MONTH</small><strong>$3,185</strong></div><span className="mini-pay-check"><BadgeCheck size={18} /></span></div>
+            <div className="mini-pay"><span className="mini-pay-icon"><Banknote size={19} /></span><div><small>PAY THIS MONTH · INR</small><strong>₹30,290</strong></div><span className="mini-pay-check"><BadgeCheck size={18} /></span></div>
           </div>
           <div className="float-note note-safety"><span><ShieldCheck size={17} /></span><div><strong>Concern tracked</strong><small>Update: in progress</small></div></div>
           <div className="float-note note-rest"><span><Leaf size={17} /></span><div><strong>Rest matters</strong><small>Next shift · 14 hrs away</small></div></div>
